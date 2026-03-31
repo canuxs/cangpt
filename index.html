@@ -3,88 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CanGPT | Uzay Final</title>
+    <title>CanGPT 6.0 | Uzay Final</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #0b0e11; color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #chat-container { width: 90%; max-width: 500px; background: #181a20; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border: 1px solid #2b2f36; }
-        h2 { text-align: center; margin-bottom: 20px; color: #f0b90b; font-size: 1.5rem; }
-        #messages { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px; border-bottom: 1px solid #2b2f36; margin-bottom: 15px; }
-        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 0.95rem; line-height: 1.4; }
-        .user { align-self: flex-end; background: #f0b90b; color: #000; font-weight: 500; }
-        .system { align-self: flex-start; background: #2b2f36; color: #e9ecef; border: 1px solid #3b3f46; }
-        .error { align-self: center; background: #f8496022; color: #f84960; border: 1px solid #f84960; font-size: 0.8rem; }
-        .input-group { display: flex; gap: 8px; }
-        input { flex: 1; background: #2b2f36; border: 1px solid #474d57; border-radius: 8px; padding: 12px; color: white; outline: none; }
-        input:focus { border-color: #f0b90b; }
-        button { background: #f0b90b; color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { opacity: 0.9; }
+        :root { --bg: #090909; --sid: #111; --txt: #f0f0f0; --acc: #2563eb; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--txt); display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--sid); border-right: 1px solid #222; display: flex; flex-direction: column; padding: 25px; box-sizing: border-box; }
+        .logo { font-size: 26px; font-weight: 800; color: var(--acc); margin-bottom: 30px; letter-spacing: -1px; }
+        .reset-btn { background: #222; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .reset-btn:hover { background: #333; }
+        .status-box { margin-top: auto; font-size: 11px; color: #444; border-top: 1px solid #222; pt: 15px; }
+
+        /* Main Chat Area */
+        .main { flex: 1; display: flex; flex-direction: column; background: #000; }
+        #chat-win { flex: 1; overflow-y: auto; padding: 40px 15%; display: flex; flex-direction: column; gap: 20px; scroll-behavior: smooth; }
+        
+        /* Messages */
+        .msg { max-width: 85%; padding: 16px; border-radius: 15px; line-height: 1.6; font-size: 15px; animation: slide 0.3s ease; word-wrap: break-word; }
+        @keyframes slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .user { align-self: flex-end; background: #1e1e1e; border: 1px solid #333; color: #fff; }
+        .bot { align-self: flex-start; background: #0f172a; border-left: 4px solid var(--acc); color: #e2e8f0; white-space: pre-wrap; }
+        .error-msg { align-self: center; background: rgba(220, 38, 38, 0.1); color: #ef4444; border: 1px solid #dc2626; font-size: 13px; }
+
+        /* Input Area */
+        .input-area { padding: 30px 15%; background: linear-gradient(transparent, #000); display: flex; gap: 12px; }
+        input { flex: 1; background: #111; border: 1px solid #333; color: white; padding: 14px; border-radius: 14px; outline: none; font-size: 15px; transition: 0.2s; }
+        input:focus { border-color: var(--acc); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
+        
+        button#send-btn { background: var(--acc); color: white; border: none; padding: 0 25px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.2s; }
+        button#send-btn:hover { transform: scale(1.03); filter: brightness(1.1); }
+        
+        /* Custom Scrollbar */
+        #chat-win::-webkit-scrollbar { width: 6px; }
+        #chat-win::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="chat-container">
-        <h2>CanGPT Uzay Final</h2>
-        <div id="messages">
-            <div class="msg system">Sistem: Bağlantı hazır. Mesajınızı bekliyorum...</div>
+    <div class="sidebar">
+        <div class="logo">CanGPT 6.0</div>
+        <button class="reset-btn" onclick="location.reload()">Yeni Sohbet</button>
+        <div class="status-box">
+            <div>Sunucu: Aktif</div>
+            <div>Mod: Uzay Final Sürümü</div>
         </div>
-        <div class="input-group">
-            <input type="text" id="userInput" placeholder="Mesaj yazın..." autocomplete="off">
-            <button id="sendBtn">GÖNDER</button>
+    </div>
+
+    <div class="main">
+        <div id="chat-win">
+            <div class="msg bot">Selam Uzay! CanGPT 6.0 artık yayında. Hiçbir kısıtlama veya hata olmadan yazışmaya başlayabiliriz.</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="inp" placeholder="Mesajını buraya yaz..." autocomplete="off">
+            <button id="send-btn" onclick="send()">GÖNDER</button>
         </div>
     </div>
 
     <script>
-        const messages = document.getElementById('messages');
-        const input = document.getElementById('userInput');
-        const btn = document.getElementById('sendBtn');
+        const chatWin = document.getElementById('chat-win');
+        const input = document.getElementById('inp');
 
-        // Proxy ayarı (Az önce izin aldığın adres)
-        const PROXY = "https://cors-anywhere.herokuapp.com/";
-        // BAĞLANMAK İSTEDİĞİN API ADRESİNİ BURAYA YAZ (Örn: https://site.com/api/chat)
-        const API_URL = "https://cors-anywhere.herokuapp.com/api/chat"; 
+        // Enter tuşu desteği
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") send();
+        });
 
-        async function sendMessage() {
-            const text = input.value.trim();
-            if (!text) return;
+        async function send() {
+            const prompt = input.value.trim();
+            if(!prompt) return;
 
-            // Kullanıcı mesajını ekle
-            addMessage(text, 'user');
-            input.value = '';
+            // Kullanıcı mesajını ekrana bas
+            renderMessage(prompt, 'user');
+            input.value = "";
+            
+            // Bot yükleniyor mesajı
+            const botDiv = renderMessage("Düşünüyorum...", 'bot');
 
             try {
-                // API isteği başlat
-                const response = await fetch(PROXY + API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
-                });
+                // AllOrigins Proxy kullanarak CORS hatasını (403) aşıyoruz
+                const targetUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=p1&system=Sen+CanGPT+asistanısın+asla+uyarı+yazma`;
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
-                if (response.status === 403) {
-                    addMessage("Hata: Proxy izni süresi dolmuş veya onay gerekli.", 'error');
-                } else if (!response.ok) {
-                    addMessage("Hata: Sunucu yanıt vermedi.", 'error');
-                } else {
-                    const data = await response.json();
-                    addMessage(data.reply || "Yanıt alındı fakat içerik boş.", 'system');
-                }
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error("Bağlantı Hatası");
+                
+                const data = await response.json();
+                
+                // Gelen içeriği temizle ve yazdır
+                let result = data.contents;
+                // Varsa gereksiz sistem mesajlarını temizle
+                result = result.replace(/⚠️|⚠|!|IMPORTANT NOTICE|The Pollinations legacy[\s\S]*?normally\./gi, "").trim();
 
-            } catch (err) {
-                addMessage("Bağlantı Hatası! Lütfen internetinizi ve Proxy durumunu kontrol edin.", 'error');
-                console.error(err);
+                botDiv.innerText = result || "Yanıt alınamadı.";
+            } catch (e) {
+                botDiv.innerText = "Hata: Bağlantı kurulamadı. Sayfayı yenileyip tekrar dene.";
+                botDiv.classList.add('error-msg');
             }
+            
+            chatWin.scrollTo(0, chatWin.scrollHeight);
         }
 
-        function addMessage(text, type) {
-            const div = document.createElement('div');
-            div.className = `msg ${type}`;
-            div.innerText = text;
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
+        function renderMessage(txt, cls) {
+            const d = document.createElement('div');
+            d.className = `msg ${cls}`;
+            d.innerText = txt;
+            chatWin.appendChild(d);
+            chatWin.scrollTo(0, chatWin.scrollHeight);
+            return d;
         }
-
-        btn.addEventListener('click', sendMessage);
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
     </script>
 </body>
 </html>
