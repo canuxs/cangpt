@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CanGPT | Uzay Final</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #0b0e11; color: #e9ecef; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #chat-container { width: 90%; max-width: 500px; background: #181a20; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border: 1px solid #2b2f36; }
+        h2 { text-align: center; margin-bottom: 20px; color: #f0b90b; font-size: 1.5rem; }
+        #messages { height: 350px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 10px; border-bottom: 1px solid #2b2f36; margin-bottom: 15px; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 0.95rem; line-height: 1.4; }
+        .user { align-self: flex-end; background: #f0b90b; color: #000; font-weight: 500; }
+        .system { align-self: flex-start; background: #2b2f36; color: #e9ecef; border: 1px solid #3b3f46; }
+        .error { align-self: center; background: #f8496022; color: #f84960; border: 1px solid #f84960; font-size: 0.8rem; }
+        .input-group { display: flex; gap: 8px; }
+        input { flex: 1; background: #2b2f36; border: 1px solid #474d57; border-radius: 8px; padding: 12px; color: white; outline: none; }
+        input:focus { border-color: #f0b90b; }
+        button { background: #f0b90b; color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <h2>CanGPT Uzay Final</h2>
+        <div id="messages">
+            <div class="msg system">Sistem: Bağlantı hazır. Mesajınızı bekliyorum...</div>
+        </div>
+        <div class="input-group">
+            <input type="text" id="userInput" placeholder="Mesaj yazın..." autocomplete="off">
+            <button id="sendBtn">GÖNDER</button>
+        </div>
+    </div>
+
+    <script>
+        const messages = document.getElementById('messages');
+        const input = document.getElementById('userInput');
+        const btn = document.getElementById('sendBtn');
+
+        // Proxy ayarı (Az önce izin aldığın adres)
+        const PROXY = "https://cors-anywhere.herokuapp.com/";
+        // BAĞLANMAK İSTEDİĞİN API ADRESİNİ BURAYA YAZ (Örn: https://site.com/api/chat)
+        const API_URL = "https://cors-anywhere.herokuapp.com/api/chat"; 
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Kullanıcı mesajını ekle
+            addMessage(text, 'user');
+            input.value = '';
+
+            try {
+                // API isteği başlat
+                const response = await fetch(PROXY + API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (response.status === 403) {
+                    addMessage("Hata: Proxy izni süresi dolmuş veya onay gerekli.", 'error');
+                } else if (!response.ok) {
+                    addMessage("Hata: Sunucu yanıt vermedi.", 'error');
+                } else {
+                    const data = await response.json();
+                    addMessage(data.reply || "Yanıt alındı fakat içerik boş.", 'system');
+                }
+
+            } catch (err) {
+                addMessage("Bağlantı Hatası! Lütfen internetinizi ve Proxy durumunu kontrol edin.", 'error');
+                console.error(err);
+            }
+        }
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            div.innerText = text;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        btn.addEventListener('click', sendMessage);
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
+    </script>
+</body>
+</html>
