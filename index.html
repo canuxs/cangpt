@@ -70,7 +70,7 @@
                 addBubble("Hata: " + (data.error || "Sunucu hatası."), 'ai');
             }
         } catch (err) {
-            addBubble("Bağlantı kesildi, sunucu uyanıyor olabilir.", 'ai');
+            addBubble("Bağlantı kesildi, internet bağlantını kontrol et.", 'ai');
         }
     }
 
@@ -86,10 +86,12 @@
         chat.appendChild(div);
         chat.scrollTop = chat.scrollHeight;
     }
-
+    
     function resetChat() {
         chatHistory = [];
-        document.getElementById("chat").innerHTML = '<div class="bubble ai">Sohbet sıfırlandı. Merhaba Can Bartu!</div>';
+        // 1111 ile 9999 arasında rastgele sayı üretme:
+        const randomID = Math.floor(Math.random() * (9999 - 1111 + 1)) + 1111;
+        document.getElementById("chat").innerHTML = `<div class="bubble ai">[Denek ${randomID}'nin hafızası sıfırlandı.]</div>`;
     }
 </script>
 </body>
