@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CanGPT U1</title>
+    <title>CanGPT U1 | Llama 3.3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <style>
         * { box-sizing: border-box; }
@@ -32,7 +32,7 @@
 
 <div id="main">
     <div id="chat">
-        <div class="bubble ai">Selam! Ben CanGPT U1!geliştirdi.</div>
+        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır. Senin için ne yapabilirim?</div>
     </div>
     <div id="input-container">
         <input type="text" id="userInput" placeholder="Bir şeyler yazın..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -42,7 +42,7 @@
 
 <script>
     const API_URL = "/chat";
-    let chatHistory = []; // Hafıza burada tutuluyor
+    let chatHistory = []; 
 
     async function sendMessage() {
         const input = document.getElementById("userInput");
@@ -52,7 +52,6 @@
         addBubble(text, 'user');
         input.value = "";
         
-        // Kullanıcı mesajını geçmişe ekle
         chatHistory.push({ role: "user", content: text });
 
         try {
@@ -62,15 +61,15 @@
                 body: JSON.stringify({ history: chatHistory })
             });
             const data = await res.json();
-            const aiText = data.text || "Hata: Yanıt yok.";
             
-            addBubble(aiText, 'ai');
-            
-            // AI yanıtını geçmişe ekle
-            chatHistory.push({ role: "assistant", content: aiText });
-
+            if (data.text) {
+                addBubble(data.text, 'ai');
+                chatHistory.push({ role: "assistant", content: data.text });
+            } else {
+                addBubble("Hata: " + (data.error || "Sunucu hatası."), 'ai');
+            }
         } catch (err) {
-            addBubble("Bağlantı hatası oluştu.", 'ai');
+            addBubble("Bağlantı kesildi, sunucu uyanıyor olabilir.", 'ai');
         }
     }
 
@@ -89,7 +88,7 @@
 
     function resetChat() {
         chatHistory = [];
-        document.getElementById("chat").innerHTML = '<div class="bubble ai">Sohbet sıfırlandı. Yeni bir şeye başlayalım!</div>';
+        document.getElementById("chat").innerHTML = '<div class="bubble ai">Sohbet sıfırlandı. Merhaba Can Bartu!</div>';
     }
 </script>
 </body>
