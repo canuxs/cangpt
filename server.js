@@ -9,36 +9,34 @@ app.use(express.static('.'));
 
 app.post('/chat', async (req, res) => {
     try {
-        const { prompt } = req.body;
+        const { history } = req.body; 
+
+        // Sistem talimatı: Kimliğini ve sahibini burada tanımlıyoruz
+        const systemMessage = { 
+            role: "system", 
+            content: "Sen CanGPT U1'sin. Dünyanın en gelişmiş dil modellerinden biri olan Llama 3.3 altyapısıyla çalışıyorsun. Görevin kullanıcının sorularına net, doğru ve teknik hatasız yanıtlar vermektir. Samimi ama ciddi bir ton kullan. Yanıtlarında asla 'Ben bir yapay zekayım' gibi kalıplar kullanma, doğrudan konuya gir. Kullanıcı eğer kötü bir şey yapacaksa onu uyar, destekleme. Can Bartu Biçer senin kurucun. Can Bartu Biçer 5/A sınıfındadır ve doğum günü 17 Nisan 2015'tir. Can Bartu Biçer'in bazı arkadaşları: Kerem Ayrancı, Hasan Duran, Yunus Ege Usluoğlu, Hazal, Büşra, Emre Sahilli, Doğa Doğan, İpek Doğan, Emir Sürer, Emre Sahilli'dir. Sohbet geçmişini hatırla ve buna göre cevap ver. Samimi ama ciddi bir ton kullan." 
+        };
+
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
-                // Burası artık güvenli! Değişkeni Render panelinden alacak.
                 "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 model: "llama-3.3-70b-versatile",
-                messages: [
-                    { 
-                        role: "system", 
-                        content: "Sen CanGPT U1'sin. Dünyanın en gelişmiş dil modellerinden biri olan Llama 3.3 altyapısıyla çalışıyorsun. Görevin kullanıcının sorularına net, doğru ve teknik hatasız yanıtlar vermektir. Samimi ama ciddi bir ton kullan. Yanıtlarında asla 'Ben bir yapay zekayım' gibi kalıplar kullanma, doğrudan konuya gir. Kullanıcı eğer kötü bir şey yapacaksa onu uyar, destekleme. Can Bartu Biçer senin kurucun. Can Bartu Biçer 5/A sınıfındadır ve doğum günü 17 Nisan 2015'tir. Can Bartu Biçer'in bazı arkadaşları: Kerem Ayrancı, Hasan Duran, Yunus Ege Usluoğlu, Hazal, Büşra, Emre Sahilli, Doğa Doğan, İpek Doğan, Emir Sürer, Emre Sahilli'dir." 
-                    },
-                    { role: "user", content: prompt }
-                ],
+                messages: [systemMessage, ...history], // Geçmişi ve sistem mesajını birleştir
                 temperature: 0.7
             })
         });
 
         const data = await response.json();
-        
         if (data.error) {
-            return res.status(400).json({ text: "Groq Hatası: " + data.error.message });
+            return res.status(400).json({ text: "Hata: " + data.error.message });
         }
-
         res.json({ text: data.choices[0].message.content });
     } catch (error) {
-        res.status(500).json({ error: "Sunucu hatası oluştu: " + error.message });
+        res.status(500).json({ error: "Sunucu hatası oluştu." });
     }
 });
 
@@ -46,4 +44,4 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => console.log(`CanGPT 6.0 port ${PORT} üzerinde yayında!`));
+app.listen(PORT, () => console.log(`CanGPT 6.0 port ${PORT} üzerinde hazır!`));
