@@ -17,10 +17,10 @@
         .user { align-self: flex-end; background: #222; border: 1px solid #333; border-bottom-right-radius: 2px; }
         .ai { align-self: flex-start; background: #001a33; color: #99ccff; border: 1px solid #004080; border-bottom-left-radius: 2px; }
         
-        /* Markdown kod kutuları için ek stil */
-        pre { background: #050505; padding: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #1a1a1a; }
-        code { font-family: 'Consolas', monospace; color: #e6edf3; }
-        p { margin: 8px 0; }
+        /* Kod blokları için stil */
+        pre { background: #050505; padding: 15px; border-radius: 8px; overflow-x: auto; border: 1px solid #1a1a1a; margin: 10px 0; }
+        code { font-family: 'Consolas', monospace; color: #e6edf3; font-size: 14px; }
+        p { margin: 5px 0; }
 
         #input-container { padding: 25px; background: #000; border-top: 1px solid #222; display: flex; gap: 12px; }
         input { flex-grow: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; outline: none; font-size: 16px; }
@@ -36,7 +36,7 @@
 
 <div id="main">
     <div id="chat">
-        <div class="bubble ai">Selam! CanGPT 6.0 Render üzerinde hazır. Her şey yolunda mı?</div>
+        <div class="bubble ai">Selam! CanGPT 6.0 Render üzerinde hazır. Artık Markdown ve kod desteği aktif. Ne sormak istersin?</div>
     </div>
     <div id="input-container">
         <input type="text" id="userInput" placeholder="Bir şeyler yazın..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -64,7 +64,7 @@
             const data = await res.json();
             addBubble(data.text || "Hata: Yanıt alınamadı.", 'ai');
         } catch (err) {
-            addBubble("Bağlantı hatası oluştu.", 'ai');
+            addBubble("Bağlantı hatası: Sunucu uyanıyor olabilir.", 'ai');
         }
     }
 
@@ -72,9 +72,17 @@
         const div = document.createElement("div");
         div.className = `bubble ${sender}`;
         
-        // Kütüphanenin yüklü olup olmadığını kontrol ediyoruz
-        if (sender === 'ai' && typeof marked !== 'undefined') {
-            div.innerHTML = marked.parse(text);
+        // Hata korumalı Markdown işleme
+        if (sender === 'ai') {
+            try {
+                if (typeof marked !== 'undefined') {
+                    div.innerHTML = marked.parse(text);
+                } else {
+                    div.innerText = text; // Kütüphane yüklenmezse düz metin göster
+                }
+            } catch (e) {
+                div.innerText = text;
+            }
         } else {
             div.innerText = text;
         }
