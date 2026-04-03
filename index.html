@@ -35,7 +35,6 @@
         input { flex-grow: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; outline: none; font-size: 16px; }
         button#send { background: #0066cc; color: #fff; border: none; padding: 0 30px; border-radius: 10px; cursor: pointer; font-weight: bold; }
         
-        /* Kayıtlar Paneli */
         #records-list { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
         .record-item { font-size: 12px; padding: 8px; background: #111; border: 1px solid #222; border-radius: 5px; cursor: pointer; color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .record-item:hover { color: #fff; background: #1a1a1a; }
@@ -48,8 +47,7 @@
     <button class="nav-btn btn-red" onclick="resetChat()">🗑 Sohbeti Sıfırla</button>
     <button class="nav-btn" onclick="saveCurrentChat()">💾 Sohbeti Kaydet</button>
     <div style="color: #555; font-size: 12px; margin-top: 10px; font-weight: bold;">KAYITLAR</div>
-    <div id="records-list">
-        </div>
+    <div id="records-list"></div>
 </div>
 
 <div id="main">
@@ -66,7 +64,6 @@
     const API_URL = "/chat";
     let chatHistory = []; 
 
-    // Sayfa açıldığında kayıtları yükle
     window.onload = loadRecords;
 
     async function sendMessage() {
@@ -114,20 +111,15 @@
         document.getElementById("chat").innerHTML = '<div class="bubble ai">Sohbet sıfırlandı. Merhaba Can Bartu!</div>';
     }
 
-    // --- KAYIT SİSTEMİ ---
-
     function saveCurrentChat() {
         if (chatHistory.length === 0) return alert("Kaydedilecek bir şey yok!");
-        
         const timestamp = new Date().toLocaleString('tr-TR');
         const chatName = prompt("Sohbet ismi girin:", "Sohbet " + timestamp);
-        
         if (!chatName) return;
 
         const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
         savedChats.push({ name: chatName, history: [...chatHistory] });
         localStorage.setItem('cangpt_records', JSON.stringify(savedChats));
-        
         loadRecords();
         alert("Sohbet başarıyla kaydedildi!");
     }
@@ -136,7 +128,6 @@
         const list = document.getElementById("records-list");
         const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
         list.innerHTML = "";
-
         savedChats.forEach((chat, index) => {
             const item = document.createElement("div");
             item.className = "record-item";
@@ -149,7 +140,6 @@
     function openRecord(index) {
         const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
         const selectedChat = savedChats[index];
-        
         if (confirm("Mevcut sohbet kapatılıp bu kayıt yüklensin mi?")) {
             chatHistory = selectedChat.history;
             document.getElementById("chat").innerHTML = "";
