@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CanGPT U1 | Llama 3.3</title>
+    <title>CanGPT U1</title>
     <meta name="description" content="CanGPT U1: Can Bartu Biçer tarafından geliştirilen, Llama 3.3 altyapısına sahip dünyanın en gelişmiş yapay zeka asistanı.">
     <meta name="author" content="Can Bartu Biçer">
     <link rel="icon" type="image/png" href="favicon.png">
@@ -44,15 +44,15 @@
 
 <div id="sidebar">
     <h2>CanGPT U1</h2>
-    <button class="nav-btn btn-red" onclick="resetChat()">🗑 Sohbeti Sıfırla</button>
-    <button class="nav-btn" onclick="saveCurrentChat()">💾 Sohbeti Kaydet</button>
+    <button class="nav-btn btn-red" onclick="resetChat()">Sohbeti Sıfırla</button>
+    <button class="nav-btn" onclick="saveCurrentChat()">Sohbeti Kaydet</button>
     <div style="color: #555; font-size: 12px; margin-top: 10px; font-weight: bold;">KAYITLAR</div>
     <div id="records-list"></div>
 </div>
 
 <div id="main">
     <div id="chat">
-        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır. Bugün hangi arkadaşınla ne yapmak istersin?</div>
+        <div class="bubble ai">Merhaba! Size nasıl yardımcı olabilirim?</div>
     </div>
     <div id="input-container">
         <input type="text" id="userInput" placeholder="Bir şeyler yazın..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -108,7 +108,7 @@
 
     function resetChat() {
         chatHistory = [];
-        document.getElementById("chat").innerHTML = '<div class="bubble ai">Sohbet sıfırlandı. Merhaba Can Bartu!</div>';
+        document.getElementById("chat").innerHTML = '<div class="bubble ai">Sohbet sıfırlandı. Yeni sohbete başladık</div>';
     }
 
     function saveCurrentChat() {
