@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CanGPT U1 | Llama 3.3</title>
-    <meta name="description" content="CanGPT U1: Can Bartu Biçer tarafından geliştirilen yapay zeka asistanı.">
+    <title>CanGPT</title>
+    <meta name="description" content="CanGPT: Can Bartu Biçer tarafından geliştirilen yapay zeka asistanı.">
     <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -34,19 +34,19 @@
 <body>
 
 <div id="sidebar">
-    <h2>CanGPT U1</h2>
-    <button class="nav-btn btn-red" onclick="resetChat()">🗑 Sohbeti Sıfırla</button>
-    <button class="nav-btn" onclick="saveCurrentChat()">💾 Sohbeti Kaydet</button>
+    <h2>CanGPT</h2>
+    <button class="nav-btn btn-red" onclick="resetChat()">Sohbeti Sıfırla</button>
+    <button class="nav-btn" onclick="saveCurrentChat()">Sohbeti Kaydet</button>
     <div style="color: #555; font-size: 12px; margin-top: 10px; font-weight: bold;">KAYITLAR</div>
     <div id="records-list"></div>
 </div>
 
 <div id="main">
     <div id="chat">
-        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır. Hem sohbet edebiliriz hem de istersen senin için görseller çizebilirim.</div>
+        <div class="bubble ai">Selam! Size nasıl yardımcı olabilirim?</div>
     </div>
     <div id="input-container">
-        <input type="text" id="userInput" placeholder="Bir şeyler yazın veya 'limon çiz' deyin..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <input type="text" id="userInput" placeholder="Bir şeyler yazın..." onkeypress="if(event.key==='Enter') sendMessage()">
         <button id="send" onclick="sendMessage()">GÖNDER</button>
     </div>
 </div>
