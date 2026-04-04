@@ -4,69 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CanGPT U1 | Llama 3.3</title>
-    <meta name="description" content="CanGPT U1: Can Bartu Biçer tarafından geliştirilen yapay zeka asistanı.">
-    <link rel="icon" type="image/png" href="favicon.png">
-    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
     <style>
         * { box-sizing: border-box; }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         #sidebar { width: 260px; background: #0b0b0b; border-right: 1px solid #222; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        #sidebar h2 { color: #4dabf7; font-size: 24px; margin-bottom: 10px; }
-        .nav-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 12px; cursor: pointer; border-radius: 8px; width: 100%; transition: 0.3s; text-align: left; font-size: 14px; }
-        .nav-btn:hover { background: #252525; border-color: #4dabf7; }
-        .btn-red { border-color: #441111; }
         #main { flex-grow: 1; display: flex; flex-direction: column; background: #000; }
         #chat { flex-grow: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
-        .bubble { max-width: 85%; padding: 12px 20px; border-radius: 15px; line-height: 1.6; font-size: 16px; position: relative; }
+        .bubble { max-width: 85%; padding: 12px 20px; border-radius: 15px; line-height: 1.6; }
         .user { align-self: flex-end; background: #222; border: 1px solid #333; }
         .ai { align-self: flex-start; background: #001a33; color: #99ccff; border: 1px solid #004080; }
-        
-        /* Görsel Alanı Tasarımı */
         .img-container { margin-top: 10px; background: #111; border-radius: 10px; padding: 15px; border: 1px solid #333; text-align: center; }
-        .gen-image { width: 100%; max-width: 400px; border-radius: 8px; display: block; margin: 10px auto; border: 1px solid #444; }
-        
-        .dl-btn { display: inline-block; margin-top: 10px; padding: 10px 20px; background: #0066cc; color: #fff !important; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold; text-decoration: none; transition: 0.2s; }
-        .dl-btn:hover { background: #0052a3; transform: scale(1.02); }
-        
+        .gen-image { width: 100%; max-width: 450px; border-radius: 8px; margin: 10px auto; display: block; }
+        .dl-btn { display: inline-block; margin-top: 10px; padding: 10px 20px; background: #0066cc; color: #fff !important; border-radius: 8px; text-decoration: none; font-weight: bold; }
         #input-container { padding: 25px; border-top: 1px solid #222; display: flex; gap: 12px; }
         input { flex-grow: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; outline: none; }
-        button#send { background: #0066cc; color: #fff; border: none; padding: 0 30px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
-        /* Kayıt Listesi Tasarımı */
-        .record-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; font-size: 13px; margin-bottom: 8px; transition: 0.2s; }
-        .record-item:hover { border-color: #444; }
-        .record-actions { display: flex; gap: 10px; font-size: 16px; }
-        .action-btn { cursor: pointer; filter: grayscale(1); transition: 0.2s; }
-        .action-btn:hover { filter: grayscale(0); transform: scale(1.2); }
+        button { background: #0066cc; color: #fff; border: none; padding: 0 30px; border-radius: 10px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h2>CanGPT U1</h2>
-    <button class="nav-btn btn-red" onclick="resetChat()">🗑 Sohbeti Sıfırla</button>
-    <button class="nav-btn" onclick="saveCurrentChat()">💾 Sohbeti Kaydet</button>
-    <div style="color: #555; font-size: 12px; margin-top: 15px; font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 5px;">KAYITLAR</div>
-    <div id="records-list" style="margin-top: 10px; overflow-y: auto;"></div>
+    <h2 style="color:#4dabf7">CanGPT U1</h2>
+    <button onclick="location.reload()" style="background:#1a1a1a; color:white; padding:10px; cursor:pointer; border-radius:8px; border:1px solid #333;">🗑 Temizle</button>
 </div>
 
 <div id="main">
-    <div id="chat">
-        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır. Bugün ne üzerine çalışıyoruz?</div>
-    </div>
+    <div id="chat"><div class="bubble ai">Selam Can Bartu! Bugün ne yapıyoruz?</div></div>
     <div id="input-container">
-        <input type="text" id="userInput" placeholder="Mesajınızı yazın veya 'görsel çiz' deyin..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button id="send" onclick="sendMessage()">GÖNDER</button>
+        <input type="text" id="userInput" placeholder="Mesajını yaz veya görsel iste..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">GÖNDER</button>
     </div>
 </div>
 
 <script>
-    const API_URL = "/chat";
     let chatHistory = [];
-
-    window.onload = loadRecords;
 
     async function sendMessage() {
         const input = document.getElementById("userInput");
@@ -78,7 +50,7 @@
         chatHistory.push({ role: "user", content: text });
 
         try {
-            const res = await fetch(API_URL, {
+            const res = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ history: chatHistory })
@@ -86,136 +58,39 @@
             const data = await res.json();
             
             if (data.text) {
-                processAIResponse(data.text);
+                if (data.text.includes("GÖRSEL_OLUŞTUR:")) {
+                    const prompt = data.text.split("GÖRSEL_OLUŞTUR:")[1].trim();
+                    const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*999)}`;
+                    addImageBubble(imgUrl, prompt);
+                } else {
+                    addBubble(data.text, 'ai');
+                }
                 chatHistory.push({ role: "assistant", content: data.text });
             }
-        } catch (err) {
-            addBubble("Bağlantı hatası oluştu. Lütfen Render servisini kontrol et.", 'ai');
-        }
-    }
-
-    function processAIResponse(text) {
-        if (text.includes("GÖRSEL_OLUŞTUR:")) {
-            const parts = text.split("GÖRSEL_OLUŞTUR:");
-            const cleanText = parts[0].trim();
-            const desc = parts[1].trim();
-            
-            if(cleanText) addBubble(cleanText, 'ai');
-            
-            // Rastgele seed ekleyerek görselin her seferinde yeni üretilmesini sağlıyoruz
-            const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(desc)}?width=1024&height=1024&seed=${Math.floor(Math.random()*9999)}&nologo=true`;
-            addImageBubble(imgUrl, desc);
-        } else {
-            addBubble(text, 'ai');
-        }
+        } catch (err) { addBubble("Hata oluştu.", 'ai'); }
     }
 
     function addBubble(text, sender) {
         const div = document.createElement("div");
         div.className = `bubble ${sender}`;
-        
-        try {
-            // marked yüklendiyse Markdown olarak, yoksa düz metin olarak basar
-            if (sender === 'ai' && typeof marked !== 'undefined') {
-                div.innerHTML = marked.parse(text);
-            } else {
-                div.innerText = text;
-            }
-        } catch (e) {
-            div.innerText = text;
-        }
-        
-        const chat = document.getElementById("chat");
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
+        div.innerHTML = sender === 'ai' ? marked.parse(text) : text;
+        document.getElementById("chat").appendChild(div);
+        document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
     }
 
     function addImageBubble(url, desc) {
         const div = document.createElement("div");
         div.className = "bubble ai";
+        // Proxy URL Kullanımı
+        const proxyUrl = `/proxy-image?url=${encodeURIComponent(url)}`;
         div.innerHTML = `
             <div class="img-container">
-                <p>🎨 <b>${desc}</b> çiziliyor...</p>
-                <img src="${url}" class="gen-image" onload="this.previousElementSibling.innerHTML='✅ <b>${desc}</b> hazır:'" onerror="this.style.display='none'; this.nextElementSibling.innerText='⚠️ Görsel yüklenemedi, butona basarak açmayı dene:';">
-                <br>
-                <a href="${url}" target="_blank" class="dl-btn">📥 Görseli İndir / Aç</a>
-            </div>
-        `;
+                <p>🎨 <b>${desc}</b> hazırlanıyor...</p>
+                <img src="${proxyUrl}" class="gen-image" onload="this.previousElementSibling.innerHTML='✅ Hazır:';" onerror="this.nextElementSibling.innerText='⚠️ Hata oluştu.'">
+                <br><a href="${proxyUrl}" target="_blank" download="cangpt.png" class="dl-btn">📥 İndir</a>
+            </div>`;
         document.getElementById("chat").appendChild(div);
         document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
-    }
-
-    // KAYIT SİSTEMİ (Local Storage)
-    function saveCurrentChat() {
-        if (chatHistory.length === 0) return alert("Boş sohbeti kaydedemezsin!");
-        
-        const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
-        let chatName = prompt("Sohbet ismi girin (Aynı ismi girersen üzerine yazılır):");
-        
-        if (!chatName) return;
-
-        const existingIndex = savedChats.findIndex(c => c.name === chatName);
-        if (existingIndex > -1) {
-            savedChats[existingIndex].history = [...chatHistory];
-            alert("Mevcut kaydın üzerine yazıldı.");
-        } else {
-            savedChats.push({ name: chatName, history: [...chatHistory], date: new Date().toLocaleString() });
-            alert("Yeni sohbet kaydedildi.");
-        }
-
-        localStorage.setItem('cangpt_records', JSON.stringify(savedChats));
-        loadRecords();
-    }
-
-    function loadRecords() {
-        const list = document.getElementById("records-list");
-        const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
-        list.innerHTML = "";
-        
-        savedChats.forEach((chat, index) => {
-            const container = document.createElement("div");
-            container.className = "record-item";
-            container.innerHTML = `
-                <span onclick="openRecord(${index})" style="cursor:pointer; flex-grow:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${chat.name}">📄 ${chat.name}</span>
-                <div class="record-actions">
-                    <span class="action-btn" onclick="renameRecord(${index})" title="Düzenle">✏️</span>
-                    <span class="action-btn" onclick="deleteRecord(${index})" title="Sil">❌</span>
-                </div>
-            `;
-            list.appendChild(container);
-        });
-    }
-
-    function deleteRecord(index) {
-        if (!confirm("Bu sohbet kaydını kalıcı olarak silmek istediğine emin misin?")) return;
-        const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
-        savedChats.splice(index, 1);
-        localStorage.setItem('cangpt_records', JSON.stringify(savedChats));
-        loadRecords();
-    }
-
-    function renameRecord(index) {
-        const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
-        const newName = prompt("Sohbet için yeni bir isim girin:", savedChats[index].name);
-        if (newName && newName.trim() !== "") {
-            savedChats[index].name = newName.trim();
-            localStorage.setItem('cangpt_records', JSON.stringify(savedChats));
-            loadRecords();
-        }
-    }
-
-    function openRecord(index) {
-        const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
-        chatHistory = savedChats[index].history;
-        document.getElementById("chat").innerHTML = `<div class="bubble ai">📂 <b>${savedChats[index].name}</b> yüklendi.</div>`;
-        chatHistory.forEach(msg => addBubble(msg.content, msg.role === 'user' ? 'user' : 'ai'));
-    }
-
-    function resetChat() {
-        if (confirm("Mevcut sohbet ekranını temizlemek istiyor musun? (Kayıtlar silinmez)")) {
-            chatHistory = [];
-            document.getElementById("chat").innerHTML = '<div class="bubble ai">Sohbet sıfırlandı. Yeni bir şeyler sorabilirsin.</div>';
-        }
     }
 </script>
 </body>
