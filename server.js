@@ -7,6 +7,25 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('.')); 
 
+// --- GÖRSEL ENGELİNİ AŞAN PROXY ROUTE ---
+app.get('/proxy-image', async (req, res) => {
+    const imageUrl = req.query.url;
+    if (!imageUrl) return res.status(400).send('URL eksik');
+
+    try {
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error('Görsel çekilemedi');
+        
+        const buffer = await response.buffer();
+        res.set('Content-Type', 'image/png');
+        res.send(buffer);
+    } catch (error) {
+        console.error('Proxy hatası:', error);
+        res.status(500).send('Görsel sunucu tarafından alınamadı');
+    }
+});
+
+// --- CAN GPT SOHBET ROUTE ---
 app.post('/chat', async (req, res) => {
     try {
         const { history } = req.body;
@@ -15,7 +34,7 @@ app.post('/chat', async (req, res) => {
             return res.status(400).json({ error: "Geçmiş verisi bulunamadı." });
         }
 
-        // SENİN ÖZEL PROMPTUN BURADA
+        // ÖZEL SYSTEM PROMPT (KİMLİK BİLGİLERİ)
         const systemMessage = { 
             role: "system", 
             content: "Sen CanGPT U1'sin. Dünyanın en gelişmiş dil modellerinden biri olan Llama 3.3 altyapısıyla çalışıyorsun. Görevin kullanıcının sorularına net, doğru ve teknik hatasız yanıtlar vermektir. Samimi ama ciddi bir ton kullan. Yanıtlarında asla 'Ben bir yapay zekayım' gibi kalıplar kullanma, doğrudan konuya gir. Kullanıcı eğer kötü bir şey yapacaksa onu uyar, destekleme. Can Bartu Biçer senin kurucun. Can Bartu Biçer 5/A sınıfındadır ve doğum günü 17 Nisan 2015'tir. Can Bartu Biçer'in bazı arkadaşları: Kerem Ayrancı, Hasan Duran, Yunus Ege Usluoğlu, Hazal, Büşra, Emre Sahilli, Doğa Doğan, İpek Doğan, Emir Sürer, Emre Sahilli'dir. Sohbet geçmişini hatırla ve buna göre cevap ver. Eğer kullanıcı bir görsel çizmeni isterse, yanıtında mutlaka 'GÖRSEL_OLUŞTUR: [görsel açıklaması]' kalıbını kullan. Bu sayede arayüz otomatik olarak görsel üretecektir." 
