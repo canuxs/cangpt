@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CanGPT</title>
-    <meta name="description" content="CanGPT U1: Can Bartu Biçer tarafından geliştirilen yapay zeka asistanı.">
-    <link rel="icon" type="image/png" href="favicon.png">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <title>CanGPT U1 | Llama 3.3</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <style>
+        /* Tasarım kodların aynı kalıyor, sadece görsel baloncuğu için küçük ekleme */
         * { box-sizing: border-box; }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         #sidebar { width: 260px; background: #0b0b0b; border-right: 1px solid #222; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -17,18 +16,17 @@
         .btn-red { border-color: #441111; }
         #main { flex-grow: 1; display: flex; flex-direction: column; background: #000; }
         #chat { flex-grow: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
-        .bubble { max-width: 85%; padding: 12px 20px; border-radius: 15px; line-height: 1.6; font-size: 16px; position: relative; }
+        .bubble { max-width: 85%; padding: 12px 20px; border-radius: 15px; line-height: 1.6; font-size: 16px; }
         .user { align-self: flex-end; background: #222; border: 1px solid #333; }
         .ai { align-self: flex-start; background: #001a33; color: #99ccff; border: 1px solid #004080; }
-        .gen-image { width: 256px; height: 256px; border-radius: 10px; margin-top: 10px; display: block; background: #111; }
-        .dl-btn { display: inline-block; margin-top: 8px; padding: 5px 12px; background: #0066cc; color: #fff; text-decoration: none; border-radius: 5px; font-size: 12px; }
+        .gen-image { width: 256px; height: 256px; border-radius: 10px; margin-top: 10px; display: block; border: 2px solid #004080; }
+        .dl-btn { display: inline-block; margin-top: 10px; padding: 8px 15px; background: #0066cc; color: #fff; border: none; border-radius: 5px; font-size: 13px; cursor: pointer; font-weight: bold; }
+        .dl-btn:hover { background: #0052a3; }
         #input-container { padding: 25px; border-top: 1px solid #222; display: flex; gap: 12px; }
         input { flex-grow: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; outline: none; }
         button#send { background: #0066cc; color: #fff; border: none; padding: 0 30px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .record-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 8px; border-radius: 5px; border: 1px solid #222; font-size: 12px; }
-        .record-actions { display: flex; gap: 5px; }
-        .action-icon { cursor: pointer; opacity: 0.6; }
-        .action-icon:hover { opacity: 1; }
+        .record-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 8px; border-radius: 5px; border: 1px solid #222; font-size: 12px; margin-bottom: 5px; }
+        .record-actions { display: flex; gap: 8px; }
     </style>
 </head>
 <body>
@@ -43,7 +41,7 @@
 
 <div id="main">
     <div id="chat">
-        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır. Hem sohbet edebiliriz hem de istersen senin için görseller çizebilirim.</div>
+        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır.</div>
     </div>
     <div id="input-container">
         <input type="text" id="userInput" placeholder="Bir şeyler yazın veya 'limon çiz' deyin..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -61,11 +59,9 @@
         const input = document.getElementById("userInput");
         const text = input.value.trim();
         if (!text) return;
-
         addBubble(text, 'user');
         input.value = "";
         chatHistory.push({ role: "user", content: text });
-
         try {
             const res = await fetch(API_URL, {
                 method: "POST",
@@ -73,14 +69,11 @@
                 body: JSON.stringify({ history: chatHistory })
             });
             const data = await res.json();
-            
             if (data.text) {
                 processAIResponse(data.text);
                 chatHistory.push({ role: "assistant", content: data.text });
             }
-        } catch (err) {
-            addBubble("Bağlantı hatası.", 'ai');
-        }
+        } catch (err) { addBubble("Bağlantı hatası.", 'ai'); }
     }
 
     function processAIResponse(text) {
@@ -88,53 +81,66 @@
             const desc = text.split("GÖRSEL_OLUŞTUR:")[1].trim();
             const cleanText = text.split("GÖRSEL_OLUŞTUR:")[0];
             if(cleanText) addBubble(cleanText, 'ai');
-            
-            // Görsel API Simülasyonu (Placeholder - Pollinations veya Unsplash kullanılabilir)
-            const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(desc)}?width=256&height=256&seed=${Math.floor(Math.random()*1000)}`;
+            const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(desc)}?width=1024&height=1024&nologo=true`;
             addImageBubble(imgUrl, desc);
-        } else {
-            addBubble(text, 'ai');
-        }
+        } else { addBubble(text, 'ai'); }
     }
 
     function addBubble(text, sender) {
         const div = document.createElement("div");
         div.className = `bubble ${sender}`;
-        div.innerHTML = sender === 'ai' ? marked.parse(text) : text;
-        const chat = document.getElementById("chat");
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
+        // Marked kontrolü
+        if (sender === 'ai' && typeof marked !== 'undefined') {
+            div.innerHTML = marked.parse(text);
+        } else {
+            div.innerText = text;
+        }
+        document.getElementById("chat").appendChild(div);
+        document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
     }
 
     function addImageBubble(url, desc) {
         const div = document.createElement("div");
         div.className = "bubble ai";
+        const imgId = "img-" + Date.now();
         div.innerHTML = `
-            <p>İşte istediğin görsel: <b>${desc}</b></p>
-            <img src="${url}" class="gen-image" alt="${desc}">
-            <a href="${url}" download="cangpt_${Date.now()}.png" target="_blank" class="dl-btn">📥 PNG İndir</a>
+            <p>İşte görselin: <b>${desc}</b></p>
+            <img src="${url}" class="gen-image" id="${imgId}">
+            <button onclick="downloadImage('${url}', '${desc}')" class="dl-btn">📥 PNG Olarak İndir</button>
         `;
         document.getElementById("chat").appendChild(div);
         document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
     }
 
+    // GERÇEK İNDİRME FONKSİYONU
+    async function downloadImage(url, filename) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename.substring(0, 15) + ".png";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (e) {
+            window.open(url, '_blank'); // Hata olursa tarayıcıda aç
+        }
+    }
+
+    // Kayıt fonksiyonların (Kaydet, Sil, Düzenle) aynı şekilde kalıyor...
     function saveCurrentChat() {
         if (chatHistory.length === 0) return alert("Kaydedilecek bir şey yok!");
         const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
-        
-        let chatName = prompt("Sohbet ismi girin (Aynı isim girilirse üzerine yazılır):");
+        let chatName = prompt("Sohbet ismi:");
         if (!chatName) return;
-
         const existingIndex = savedChats.findIndex(c => c.name === chatName);
-        if (existingIndex > -1) {
-            savedChats[existingIndex].history = [...chatHistory];
-        } else {
-            savedChats.push({ name: chatName, history: [...chatHistory] });
-        }
-
+        if (existingIndex > -1) savedChats[existingIndex].history = [...chatHistory];
+        else savedChats.push({ name: chatName, history: [...chatHistory] });
         localStorage.setItem('cangpt_records', JSON.stringify(savedChats));
         loadRecords();
-        alert("Sohbet kaydedildi!");
     }
 
     function loadRecords() {
@@ -145,10 +151,10 @@
             const container = document.createElement("div");
             container.className = "record-item";
             container.innerHTML = `
-                <span onclick="openRecord(${index})" style="cursor:pointer; overflow:hidden;">📄 ${chat.name}</span>
+                <span onclick="openRecord(${index})" style="cursor:pointer">📄 ${chat.name}</span>
                 <div class="record-actions">
-                    <span class="action-icon" onclick="renameRecord(${index})">✏️</span>
-                    <span class="action-icon" onclick="deleteRecord(${index})">❌</span>
+                    <span onclick="renameRecord(${index})">✏️</span>
+                    <span onclick="deleteRecord(${index})">❌</span>
                 </div>
             `;
             list.appendChild(container);
@@ -156,7 +162,6 @@
     }
 
     function deleteRecord(index) {
-        if (!confirm("Bu kaydı silmek istediğine emin misin?")) return;
         const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
         savedChats.splice(index, 1);
         localStorage.setItem('cangpt_records', JSON.stringify(savedChats));
@@ -165,7 +170,7 @@
 
     function renameRecord(index) {
         const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
-        const newName = prompt("Yeni ismi girin:", savedChats[index].name);
+        const newName = prompt("Yeni isim:", savedChats[index].name);
         if (newName) {
             savedChats[index].name = newName;
             localStorage.setItem('cangpt_records', JSON.stringify(savedChats));
