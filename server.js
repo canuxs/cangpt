@@ -7,20 +7,27 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('.')); 
 
-// BASİT PROXY: Karmaşık başlıkları (headers) kaldırıp doğrudan veriyi çeker
+// GÖRSEL PROXY: Kendini tarayıcı gibi tanıtarak engelleri aşar
 app.get('/proxy-image', async (req, res) => {
     const imageUrl = req.query.url;
     if (!imageUrl) return res.status(400).send('URL eksik');
 
     try {
-        const response = await fetch(imageUrl);
-        const buffer = await response.buffer();
+        const response = await fetch(imageUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            },
+            timeout: 15000 // 15 saniye içinde cevap gelmezse iptal et
+        });
         
+        if (!response.ok) throw new Error(`Hata kodu: ${response.status}`);
+        
+        const buffer = await response.buffer();
         res.set('Content-Type', 'image/png');
         res.send(buffer);
     } catch (e) {
-        console.error("Proxy hatası:", e.message);
-        res.status(500).send('Görsel sunucu hatası');
+        console.error("Görsel hatası:", e.message);
+        res.status(500).send('Görsel alınamadı');
     }
 });
 
@@ -29,7 +36,7 @@ app.post('/chat', async (req, res) => {
         const { history } = req.body;
         const systemMessage = { 
             role: "system", 
-            content: "Sen CanGPT U1'sin. Can Bartu Biçer senin kurucundur (5/A sınıfındadır). Arkadaşları: Kerem Ayrancı, Hasan Duran, Yunus Ege Usluoğlu, Hazal, Büşra, Emre Sahilli, Doğa Doğan, İpek Doğan, Emir Sürer. Görsel çizmek için 'GÖRSEL_OLUŞTUR: [açıklama]' kalıbını kullan." 
+            content: "Sen CanGPT U1'sin. Can Bartu Biçer senin kurucun. O 5/A sınıfında. Bazı arkadaşları: Kerem Ayrancı, Hasan Duran, Yunus Ege Usluoğlu, Hazal, Büşra, Emre Sahilli, Doğa Doğan, İpek Doğan, Emir Sürer. Görsel çizmek için mutlaka 'GÖRSEL_OLUŞTUR: [açıklama]' kalıbını kullan." 
         };
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -53,4 +60,4 @@ app.post('/chat', async (req, res) => {
 });
 
 app.get('*', (req, res) => { res.sendFile(path.join(__dirname, 'index.html')); });
-app.listen(PORT, () => console.log(`CanGPT Yayında: ${PORT}`));
+app.listen(PORT, () => console.log(`Sistem aktif: ${PORT}`));
