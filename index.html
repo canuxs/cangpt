@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CanGPT U1 | Llama 3.3</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <title>CanGPT U1</title>
+    <meta name="description" content="CanGPT U1: Can Bartu Biçer tarafından geliştirilen yapay zeka asistanı.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
-        /* Tasarım kodların aynı kalıyor, sadece görsel baloncuğu için küçük ekleme */
         * { box-sizing: border-box; }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         #sidebar { width: 260px; background: #0b0b0b; border-right: 1px solid #222; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
@@ -19,14 +22,16 @@
         .bubble { max-width: 85%; padding: 12px 20px; border-radius: 15px; line-height: 1.6; font-size: 16px; }
         .user { align-self: flex-end; background: #222; border: 1px solid #333; }
         .ai { align-self: flex-start; background: #001a33; color: #99ccff; border: 1px solid #004080; }
-        .gen-image { width: 256px; height: 256px; border-radius: 10px; margin-top: 10px; display: block; border: 2px solid #004080; }
-        .dl-btn { display: inline-block; margin-top: 10px; padding: 8px 15px; background: #0066cc; color: #fff; border: none; border-radius: 5px; font-size: 13px; cursor: pointer; font-weight: bold; }
-        .dl-btn:hover { background: #0052a3; }
+        
+        /* Görsel Alanı Tasarımı */
+        .img-container { margin-top: 10px; background: #111; border-radius: 10px; padding: 10px; border: 1px dashed #444; }
+        .gen-image { width: 100%; max-width: 300px; border-radius: 8px; display: block; border: 1px solid #333; }
+        
+        .dl-btn { display: inline-block; margin-top: 10px; padding: 8px 15px; background: #0066cc; color: #fff !important; border: none; border-radius: 5px; font-size: 13px; cursor: pointer; font-weight: bold; text-decoration: none; }
         #input-container { padding: 25px; border-top: 1px solid #222; display: flex; gap: 12px; }
         input { flex-grow: 1; background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 10px; outline: none; }
         button#send { background: #0066cc; color: #fff; border: none; padding: 0 30px; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .record-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 8px; border-radius: 5px; border: 1px solid #222; font-size: 12px; margin-bottom: 5px; }
-        .record-actions { display: flex; gap: 8px; }
     </style>
 </head>
 <body>
@@ -41,7 +46,7 @@
 
 <div id="main">
     <div id="chat">
-        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır.</div>
+        <div class="bubble ai">Selam Can Bartu! CanGPT U1 hazır. Görsel çizebilirim ve sohbetlerimizi kaydedebilirim.</div>
     </div>
     <div id="input-container">
         <input type="text" id="userInput" placeholder="Bir şeyler yazın veya 'limon çiz' deyin..." onkeypress="if(event.key==='Enter') sendMessage()">
@@ -78,21 +83,26 @@
 
     function processAIResponse(text) {
         if (text.includes("GÖRSEL_OLUŞTUR:")) {
-            const desc = text.split("GÖRSEL_OLUŞTUR:")[1].trim();
-            const cleanText = text.split("GÖRSEL_OLUŞTUR:")[0];
+            const parts = text.split("GÖRSEL_OLUŞTUR:");
+            const cleanText = parts[0].trim();
+            const desc = parts[1].trim();
             if(cleanText) addBubble(cleanText, 'ai');
-            const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(desc)}?width=1024&height=1024&nologo=true`;
+            
+            // Görsel linkini daha güvenli hale getirdik
+            const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(desc)}?width=512&height=512&seed=${Math.floor(Math.random()*1000)}&nologo=true`;
             addImageBubble(imgUrl, desc);
-        } else { addBubble(text, 'ai'); }
+        } else {
+            addBubble(text, 'ai');
+        }
     }
 
     function addBubble(text, sender) {
         const div = document.createElement("div");
         div.className = `bubble ${sender}`;
-        // Marked kontrolü
-        if (sender === 'ai' && typeof marked !== 'undefined') {
-            div.innerHTML = marked.parse(text);
-        } else {
+        try {
+            // Eğer marked yüklendiyse kullan, yoksa düz yazı bas
+            div.innerHTML = (sender === 'ai' && typeof marked !== 'undefined') ? marked.parse(text) : text;
+        } catch(e) {
             div.innerText = text;
         }
         document.getElementById("chat").appendChild(div);
@@ -102,35 +112,36 @@
     function addImageBubble(url, desc) {
         const div = document.createElement("div");
         div.className = "bubble ai";
-        const imgId = "img-" + Date.now();
         div.innerHTML = `
-            <p>İşte görselin: <b>${desc}</b></p>
-            <img src="${url}" class="gen-image" id="${imgId}">
-            <button onclick="downloadImage('${url}', '${desc}')" class="dl-btn">📥 PNG Olarak İndir</button>
+            <div class="img-container">
+                <p>🎨 <b>${desc}</b> çiziliyor...</p>
+                <img src="${url}" class="gen-image" onload="this.previousElementSibling.innerText='✅ Görsel Hazır:'" onerror="this.src='https://via.placeholder.com/300?text=Gorsel+Yuklenemedi'">
+                <button onclick="downloadImage('${url}', 'cangpt_visual')" class="dl-btn">📥 PNG Olarak İndir</button>
+            </div>
         `;
         document.getElementById("chat").appendChild(div);
         document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
     }
 
-    // GERÇEK İNDİRME FONKSİYONU
-    async function downloadImage(url, filename) {
+    // Gelişmiş İndirme Fonksiyonu
+    async function downloadImage(url, name) {
         try {
             const response = await fetch(url);
             const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = filename.substring(0, 15) + ".png";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = name + ".png";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
         } catch (e) {
-            window.open(url, '_blank'); // Hata olursa tarayıcıda aç
+            window.open(url, '_blank');
         }
     }
 
-    // Kayıt fonksiyonların (Kaydet, Sil, Düzenle) aynı şekilde kalıyor...
+    // Kayıt Sistemleri
     function saveCurrentChat() {
         if (chatHistory.length === 0) return alert("Kaydedilecek bir şey yok!");
         const savedChats = JSON.parse(localStorage.getItem('cangpt_records') || '[]');
@@ -153,8 +164,8 @@
             container.innerHTML = `
                 <span onclick="openRecord(${index})" style="cursor:pointer">📄 ${chat.name}</span>
                 <div class="record-actions">
-                    <span onclick="renameRecord(${index})">✏️</span>
-                    <span onclick="deleteRecord(${index})">❌</span>
+                    <span onclick="renameRecord(${index})" style="cursor:pointer">✏️</span>
+                    <span onclick="deleteRecord(${index})" style="cursor:pointer">❌</span>
                 </div>
             `;
             list.appendChild(container);
