@@ -15,7 +15,7 @@ app.post('/chat', async (req, res) => {
             return res.status(400).json({ error: "Geçmiş verisi bulunamadı." });
         }
 
-        // SENİN ÖZEL PROMPTUN BURADA
+        // CAN BARTU BİÇER ÖZEL SİSTEM MESAJI
         const systemMessage = { 
             role: "system", 
             content: "Sen CanGPT U1'sin. Dünyanın en gelişmiş dil modellerinden biri olan Llama 3.3 altyapısıyla çalışıyorsun. Görevin kullanıcının sorularına net, doğru ve teknik hatasız yanıtlar vermektir. Samimi ama ciddi bir ton kullan. Yanıtlarında asla 'Ben bir yapay zekayım' gibi kalıplar kullanma, doğrudan konuya gir. Kullanıcı eğer kötü bir şey yapacaksa onu uyar, destekleme. Can Bartu Biçer senin kurucun. Can Bartu Biçer 5/A sınıfındadır ve doğum günü 17 Nisan 2015'tir. Can Bartu Biçer'in bazı arkadaşları: Kerem Ayrancı, Hasan Duran, Yunus Ege Usluoğlu, Hazal, Büşra, Emre Sahilli, Doğa Doğan, İpek Doğan, Emir Sürer, Emre Sahilli'dir. Sohbet geçmişini hatırla ve buna göre cevap ver. Eğer kullanıcı senden görsel çizmeni isterse 'Bunu yapamam, ben bunun için geliştirilmedim' de." 
@@ -47,6 +47,16 @@ app.post('/chat', async (req, res) => {
     }
 });
 
+// GOOGLE SEARCH CONSOLE HATALARINI ÇÖZEN YOLLAR
+app.get('/sitemap.xml', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'sitemap.xml'));
+});
+
+app.get('/robots.txt', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'robots.txt'));
+});
+
+// DİĞER TÜM İSTEKLER İÇİN INDEX.HTML (YÖNLENDİRME)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
