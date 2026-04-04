@@ -2,19 +2,19 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>CanGPT U1 | Llama 3.3</title>
+    <title>CanGPT U1 | Final</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; height: 100vh; }
         #sidebar { width: 260px; background: #0b0b0b; border-right: 1px solid #222; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         #chat { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .bubble { max-width: 80%; padding: 12px; border-radius: 10px; line-height: 1.5; }
-        .user { align-self: flex-end; background: #333; }
+        .user { align-self: flex-end; background: #222; }
         .ai { align-self: flex-start; background: #001f3f; border: 1px solid #0074d9; }
         .img-box { background: #111; padding: 15px; border-radius: 10px; border: 1px solid #333; text-align: center; }
-        img { width: 100%; border-radius: 5px; display: none; margin-top: 10px; }
+        img { width: 100%; border-radius: 5px; margin-top: 10px; }
         #input-area { padding: 20px; border-top: 1px solid #222; display: flex; gap: 10px; }
-        input { flex-grow: 1; padding: 12px; background: #111; color: #fff; border: 1px solid #333; border-radius: 5px; }
+        input { flex-grow: 1; padding: 12px; background: #111; color: #fff; border: 1px solid #333; border-radius: 5px; outline: none; }
         button { padding: 10px 20px; background: #0074d9; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
@@ -24,7 +24,7 @@
     <h3 style="color:#0074d9;">CanGPT U1</h3>
     <button onclick="saveChat()">💾 Kaydet</button>
     <button onclick="location.reload()">🗑 Sıfırla</button>
-    <div id="save-list" style="margin-top:20px; font-size:12px;"></div>
+    <div id="save-list" style="margin-top:20px;"></div>
 </div>
 
 <div id="main" style="flex-grow:1; display:flex; flex-direction:column;">
@@ -56,7 +56,7 @@
         
         if(data.text.includes("GÖRSEL_OLUŞTUR:")) {
             const prompt = data.text.split("GÖRSEL_OLUŞTUR:")[1].trim();
-            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.random()}`;
+            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Date.now()}`;
             addImageBubble(url, prompt);
         } else {
             addBubble(data.text, 'ai');
@@ -72,17 +72,26 @@
         document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
     }
 
-    function addImageBubble(url, desc) {
+    async function addImageBubble(url, desc) {
         const div = document.createElement("div");
         div.className = "bubble ai";
-        div.innerHTML = `
-            <div class="img-box">
-                <p>🎨 <b>${desc}</b> çiziliyor...</p>
-                <img src="${url}" onload="this.style.display='block'; this.previousElementSibling.innerHTML='✅ Hazır:';" 
-                     onerror="this.parentElement.innerHTML='⚠️ Yükleme hatası. Sayfayı yenileyip tekrar deneyin.';">
-                <br><a href="${url}" target="_blank" style="color:#0074d9; font-size:12px;">📥 Görseli Aç</a>
-            </div>`;
+        div.innerHTML = `<div class="img-box"><p>🎨 <b>${desc}</b> hazırlanıyor...</p></div>`;
         document.getElementById("chat").appendChild(div);
+        
+        try {
+            // GÖRSELİ ZORLA ÇEKME (BLOB YÖNTEMİ)
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const localUrl = URL.createObjectURL(blob);
+            
+            div.querySelector(".img-box").innerHTML = `
+                <p>✅ <b>${desc}</b> hazır!</p>
+                <img src="${localUrl}">
+                <br><a href="${localUrl}" download="cangpt.png" style="color:#0074d9; font-size:12px; text-decoration:none;">📥 Görseli İndir</a>
+            `;
+        } catch (e) {
+            div.querySelector(".img-box").innerHTML = `⚠️ Görsel oluşturulamadı. Lütfen tekrar dene.`;
+        }
         document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
     }
 
@@ -100,7 +109,7 @@
         list.innerHTML = "<b>KAYITLAR</b>";
         saves.reverse().forEach(s => {
             const d = document.createElement("div");
-            d.style.cssText = "cursor:pointer; padding:5px; border-bottom:1px solid #222;";
+            d.style.cssText = "cursor:pointer; padding:5px; border-bottom:1px solid #222; font-size:11px;";
             d.innerText = "💾 " + s.date;
             d.onclick = () => document.getElementById("chat").innerHTML = s.html;
             list.appendChild(d);
